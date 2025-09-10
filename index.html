@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeSnippet Quiz</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0a2a, #000000);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        .floating-logos {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .logo {
+            position: absolute;
+            opacity: 0.1;
+            font-size: 2.5rem;
+            animation: float 20s infinite linear;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+            }
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        header {
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #4aa8ff, #00ffcc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(74, 168, 255, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0c5e8;
+            margin-bottom: 2rem;
+        }
+        
+        .quiz-container {
+            background: rgba(10, 15, 35, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 0 30px rgba(0, 150, 255, 0.3);
+            border: 1px solid rgba(74, 168, 255, 0.3);
+        }
+        
+        .score-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .score {
+            color: #4aa8ff;
+            font-weight: bold;
+        }
+        
+        .progress {
+            color: #00ffcc;
+            font-weight: bold;
+        }
+        
+        .code-display {
+            background: #001933;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            color: #00ffcc;
+            border: 1px solid rgba(0, 255, 204, 0.2);
+            box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.1);
+            min-height: 180px;
+            overflow-x: auto;
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .option {
+            background: rgba(20, 40, 80, 0.7);
+            border: 2px solid rgba(74, 168, 255, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            color: #fff;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .option:hover {
+            background: rgba(30, 60, 120, 0.7);
+            border-color: rgba(74, 168, 255, 0.6);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 100, 255, 0.3);
+        }
+        
+        .option.correct {
+            background: rgba(0, 150, 0, 0.3);
+            border-color: #00ff00;
+        }
+        
+        .option.incorrect {
+            background: rgba(150, 0, 0, 0.3);
+            border-color: #ff0055;
+        }
+        
+        .feedback {
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            min-height: 2rem;
+        }
+        
+        .correct-feedback {
+            color: #00ffaa;
+            text-shadow: 0 0 10px rgba(0, 255, 170, 0.5);
+        }
+        
+        .incorrect-feedback {
+            color: #ff3366;
+            text-shadow: 0 0 10px rgba(255, 51, 102, 0.5);
+        }
+        
+        .next-btn {
+            background: linear-gradient(90deg, #4aa8ff, #00ffcc);
+            border: none;
+            border-radius: 10px;
+            padding: 1rem 2rem;
+            color: #001933;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(74, 168, 255, 0.5);
+        }
+        
+        .next-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 25px rgba(74, 168, 255, 0.7);
+        }
+        
+        .next-btn:active {
+            transform: translateY(0);
+        }
+        
+        .game-end {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .game-end h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #00ffcc;
+        }
+        
+        .final-score {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .restart-btn {
+            background: linear-gradient(90deg, #ff3366, #ffcc00);
+            border: none;
+            border-radius: 10px;
+            padding: 1rem 2rem;
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(255, 51, 102, 0.5);
+        }
+        
+        .restart-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 25px rgba(255, 51, 102, 0.7);
+        }
+        
+        .language-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .language-icon {
+            background: rgba(20, 40, 80, 0.5);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            font-size: 2rem;
+        }
+        
+        .language-name {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #a0c5e8;
+        }
+        
+        @media (max-width: 992px) {
+            .options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .language-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .options {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .language-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .language-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-logos" id="floating-logos"></div>
+    
+    <div class="container">
+        <header>
+            <h1>CodeSnippet Quiz</h1>
+            <p class="subtitle">Identify the programming language from code snippets</p>
+            <p class="subtitle">Made by: Bositxon Akmalov</p>
+        </header>
+        
+        <div class="quiz-container">
+            <div class="score-container">
+                <div>Score: <span class="score" id="score">0</span></div>
+                <div>Question: <span class="progress" id="progress">1/15</span></div>
+            </div>
+            
+            <div class="code-display" id="code-snippet">
+                // Code snippet will appear here
+            </div>
+            
+            <div class="options" id="options">
+                <!-- Options will be dynamically generated -->
+            </div>
+            
+            <div class="feedback" id="feedback"></div>
+            
+            <button class="next-btn" id="next-btn">Next Question</button>
+        </div>
+        
+        <div class="game-end" id="game-end">
+            <h2>Quiz Completed!</h2>
+            <p class="final-score">Your final score: <span id="final-score">0</span>/15</p>
+            <button class="restart-btn" id="restart-btn">Play Again</button>
+        </div>
+        
+        <div class="language-grid">
+            <div class="language-icon"><i class="fab fa-js"></i><div class="language-name">JavaScript</div></div>
+            <div class="language-icon"><i class="fab fa-python"></i><div class="language-name">Python</div></div>
+            <div class="language-icon"><i class="fab fa-java"></i><div class="language-name">Java</div></div>
+            <div class="language-icon"><i class="fab fa-cuttlefish"></i><div class="language-name">C</div></div>
+            <div class="language-icon"><i class="fab fa-cuttlefish"></i><div class="language-name">C++</div></div>
+            <div class="language-icon"><i class="fab fa-csharp"></i><div class="language-name">C#</div></div>
+            <div class="language-icon"><i class="fab fa-php"></i><div class="language-name">PHP</div></div>
+            <div class="language-icon"><i class="fab fa-swift"></i><div class="language-name">Swift</div></div>
+            <div class="language-icon"><i class="fab fa-rust"></i><div class="language-name">Rust</div></div>
+            <div class="language-icon"><i class="fab fa-ruby"></i><div class="language-name">Ruby</div></div>
+            <div class="language-icon"><i class="fab fa-gofore"></i><div class="language-name">Go</div></div>
+            <div class="language-icon"><i class="fab fa-korvue"></i><div class="language-name">Kotlin</div></div>
+            <div class="language-icon"><i class="fas fa-code"></i><div class="language-name">TypeScript</div></div>
+            <div class="language-icon"><i class="fas fa-code"></i><div class="language-name">Scala</div></div>
+            <div class="language-icon"><i class="fas fa-code"></i><div class="language-name">Perl</div></div>
+        </div>
+    </div>
+
+    <script>
+        // Quiz questions
+        const questions = [
+            {
+                code: `function greet(name) {\n  return "Hello, " + name + "!";\n}\n\nconsole.log(greet("Developer"));`,
+                language: "JavaScript",
+                options: ["JavaScript", "Python", "Java", "C#", "PHP", "Ruby"]
+            },
+            {
+                code: `def factorial(n):\n    if n == 0:\n        return 1\n    else:\n        return n * factorial(n-1)`,
+                language: "Python",
+                options: ["Python", "JavaScript", "Ruby", "PHP", "Perl", "Go"]
+            },
+            {
+                code: `using System;\nclass Program {\n    static void Main() {\n        Console.WriteLine("Hello World!");\n    }\n}`,
+                language: "C#",
+                options: ["C#", "Java", "C++", "JavaScript", "TypeScript", "Swift"]
+            },
+            {
+                code: `public class HelloWorld {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}`,
+                language: "Java",
+                options: ["Java", "C#", "C++", "Kotlin", "Scala", "TypeScript"]
+            },
+            {
+                code: `const numbers = [1, 2, 3, 4, 5];\nconst squared = numbers.map(n => n * n);\nconsole.log(squared);`,
+                language: "JavaScript",
+                options: ["JavaScript", "Python", "Java", "C#", "TypeScript", "CoffeeScript"]
+            },
+            {
+                code: `numbers = [1, 2, 3, 4, 5]\nsquared = [n**2 for n in numbers]\nprint(squared)`,
+                language: "Python",
+                options: ["Python", "Ruby", "JavaScript", "Perl", "PHP", "Lua"]
+            },
+            {
+                code: `List<int> numbers = new List<int> {1, 2, 3, 4, 5};\nList<int> squared = numbers.Select(n => n * n).ToList();`,
+                language: "C#",
+                options: ["C#", "Java", "JavaScript", "C++", "Swift", "Kotlin"]
+            },
+            {
+                code: `List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);\nList<Integer> squared = numbers.stream()\n    .map(n -> n * n)\n    .collect(Collectors.toList());`,
+                language: "Java",
+                options: ["Java", "C#", "Kotlin", "Scala", "TypeScript", "Swift"]
+            },
+            {
+                code: `#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello, World!" << endl;\n    return 0;\n}`,
+                language: "C++",
+                options: ["C++", "C", "C#", "Java", "Rust", "Go"]
+            },
+            {
+                code: `<?php\n$name = "World";\necho "Hello, " . $name . "!";\n?>`,
+                language: "PHP",
+                options: ["PHP", "JavaScript", "Python", "Ruby", "Perl", "Hack"]
+            },
+            {
+                code: `fn main() {\n    println!("Hello, World!");\n}`,
+                language: "Rust",
+                options: ["Rust", "Swift", "Go", "C++", "C", "D"]
+            },
+            {
+                code: `package main\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello, World!")\n}`,
+                language: "Go",
+                options: ["Go", "Rust", "C", "Swift", "Java", "Python"]
+            },
+            {
+                code: `let rectangle = {\n    length: 5,\n    width: 3,\n    area: function() {\n        return this.length * this.width;\n    }\n};`,
+                language: "JavaScript",
+                options: ["JavaScript", "TypeScript", "CoffeeScript", "Python", "Ruby", "PHP"]
+            },
+            {
+                code: `class Rectangle:\n    def __init__(self, length, width):\n        self.length = length\n        self.width = width\n    \n    def area(self):\n        return self.length * self.width`,
+                language: "Python",
+                options: ["Python", "Ruby", "JavaScript", "PHP", "Java", "C#"]
+            },
+            {
+                code: `interface Shape {\n    double area();\n}\n\nclass Rectangle implements Shape {\n    private double length;\n    private double width;\n    \n    public Rectangle(double length, double width) {\n        this.length = length;\n        this.width = width;\n    }\n    \n    public double area() {\n        return length * width;\n    }\n}`,
+                language: "Java",
+                options: ["Java", "C#", "TypeScript", "Kotlin", "Scala", "Dart"]
+            }
+        ];
+
+        // DOM elements
+        const codeSnippetElement = document.getElementById('code-snippet');
+        const optionsElement = document.getElementById('options');
+        const scoreElement = document.getElementById('score');
+        const progressElement = document.getElementById('progress');
+        const feedbackElement = document.getElementById('feedback');
+        const nextButton = document.getElementById('next-btn');
+        const gameEndElement = document.getElementById('game-end');
+        const finalScoreElement = document.getElementById('final-score');
+        const restartButton = document.getElementById('restart-btn');
+        const floatingLogosElement = document.getElementById('floating-logos');
+
+        // Game state
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answered = false;
+
+        // Programming language logos for background
+        const languageLogos = [
+            '<i class="fab fa-js-square"></i>',
+            '<i class="fab fa-python"></i>',
+            '<i class="fab fa-java"></i>',
+            '<i class="fab fa-cuttlefish"></i>',
+            '<i class="fab fa-cuttlefish"></i>',
+            '<i class="fab fa-csharp"></i>',
+            '<i class="fab fa-php"></i>',
+            '<i class="fab fa-swift"></i>',
+            '<i class="fab fa-rust"></i>',
+            '<i class="fab fa-ruby"></i>',
+            '<i class="fab fa-gofore"></i>',
+            '<i class="fab fa-korvue"></i>'
+        ];
+
+        // Create floating logos in the background
+        function createFloatingLogos() {
+            for (let i = 0; i < 25; i++) {
+                const logo = document.createElement('div');
+                logo.className = 'logo';
+                logo.innerHTML = languageLogos[Math.floor(Math.random() * languageLogos.length)];
+                
+                // Random position and animation delay
+                logo.style.left = `${Math.random() * 100}%`;
+                logo.style.animationDelay = `${Math.random() * 20}s`;
+                logo.style.fontSize = `${2 + Math.random() * 2}rem`;
+                
+                floatingLogosElement.appendChild(logo);
+            }
+        }
+
+        // Initialize the game
+        function initGame() {
+            createFloatingLogos();
+            loadQuestion();
+            
+            nextButton.addEventListener('click', () => {
+                if (answered) {
+                    currentQuestionIndex++;
+                    if (currentQuestionIndex < questions.length) {
+                        loadQuestion();
+                    } else {
+                        endGame();
+                    }
+                }
+            });
+            
+            restartButton.addEventListener('click', () => {
+                currentQuestionIndex = 0;
+                score = 0;
+                scoreElement.textContent = score;
+                gameEndElement.style.display = 'none';
+                document.querySelector('.quiz-container').style.display = 'block';
+                loadQuestion();
+            });
+        }
+
+        // Load a question
+        function loadQuestion() {
+            const question = questions[currentQuestionIndex];
+            codeSnippetElement.textContent = question.code;
+            progressElement.textContent = `${currentQuestionIndex + 1}/${questions.length}`;
+            
+            // Clear previous options and feedback
+            optionsElement.innerHTML = '';
+            feedbackElement.textContent = '';
+            feedbackElement.className = 'feedback';
+            nextButton.style.display = 'none';
+            answered = false;
+            
+            // Create option buttons
+            question.options.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'option';
+                button.textContent = option;
+                button.setAttribute('data-value', option);
+                
+                button.addEventListener('click', () => checkAnswer(option, question.language, button));
+                
+                optionsElement.appendChild(button);
+            });
+        }
+
+        // Check the answer
+        function checkAnswer(selected, correct, button) {
+            if (answered) return;
+            
+            answered = true;
+            const allOptions = document.querySelectorAll('.option');
+            
+            allOptions.forEach(opt => {
+                if (opt.getAttribute('data-value') === correct) {
+                    opt.classList.add('correct');
+                }
+                opt.disabled = true;
+            });
+            
+            if (selected === correct) {
+                score++;
+                scoreElement.textContent = score;
+                feedbackElement.textContent = 'Correct! Well done!';
+                feedbackElement.className = 'feedback correct-feedback';
+            } else {
+                button.classList.add('incorrect');
+                feedbackElement.textContent = `Incorrect! It's ${correct}.`;
+                feedbackElement.className = 'feedback incorrect-feedback';
+            }
+            
+            nextButton.style.display = 'block';
+        }
+
+        // End the game
+        function endGame() {
+            document.querySelector('.quiz-container').style.display = 'none';
+            gameEndElement.style.display = 'block';
+            finalScoreElement.textContent = score;
+        }
+
+        // Start the game when the page loads
+        window.addEventListener('load', initGame);
+    </script>
+</body>
+</html>
